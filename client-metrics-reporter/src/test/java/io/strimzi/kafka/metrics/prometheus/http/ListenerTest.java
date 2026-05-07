@@ -14,11 +14,11 @@ public class ListenerTest {
 
     @Test
     public void testListenerParseListener() {
-        assertEquals(new Listener("", 8080), Listener.parseListener("http://:8080"));
-        assertEquals(new Listener("123", 8080), Listener.parseListener("http://123:8080"));
-        assertEquals(new Listener("::1", 8080), Listener.parseListener("http://::1:8080"));
-        assertEquals(new Listener("::1", 8080), Listener.parseListener("http://[::1]:8080"));
-        assertEquals(new Listener("random", 8080), Listener.parseListener("http://random:8080"));
+        assertEquals(new Listener("", 8080, false), Listener.parseListener("http://:8080"));
+        assertEquals(new Listener("123", 8080, false), Listener.parseListener("http://123:8080"));
+        assertEquals(new Listener("::1", 8080, false), Listener.parseListener("http://::1:8080"));
+        assertEquals(new Listener("::1", 8080, false), Listener.parseListener("http://[::1]:8080"));
+        assertEquals(new Listener("random", 8080, false), Listener.parseListener("http://random:8080"));
 
         assertThrows(ConfigException.class, () -> Listener.parseListener("http"));
         assertThrows(ConfigException.class, () -> Listener.parseListener("http://"));

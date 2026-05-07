@@ -69,6 +69,10 @@ public class HttpServers {
             if (!listener.host.isEmpty()) {
                 builder.hostname(listener.host);
             }
+            if (listener.secure) {
+                LOG.debug("Configuring HTTPS server on {}:{}", listener.host, listener.port);
+                builder.httpsConfigurator(new CustomHttpsConfigurator(SslUtil.createSslContext()));
+            }
             this.listener = listener;
             this.count = new AtomicInteger();
         }
@@ -79,6 +83,7 @@ public class HttpServers {
         private void start() {
             try {
                 this.server = builder.buildAndStart();
+                LOG.debug("The server is HTTPS: {}", this.server);
                 LOG.debug("Started HTTP server on http://{}:{}", listener.host, server.getPort());
             } catch (IOException e) {
                 LOG.error("Failed starting HTTP server", e);

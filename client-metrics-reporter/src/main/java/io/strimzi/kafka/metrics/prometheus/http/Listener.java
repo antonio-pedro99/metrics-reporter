@@ -20,7 +20,7 @@ import static io.strimzi.kafka.metrics.prometheus.ClientMetricsReporterConfig.LI
  */
 public class Listener {
 
-    private static final Pattern PATTERN = Pattern.compile("http://\\[?([0-9a-zA-Z\\-%._:]*)]?:([0-9]+)");
+    private static final Pattern PATTERN = Pattern.compile("https?://\\[?([0-9a-zA-Z\\-%._:]*)]?:([0-9]+)");
 
     /**
      * The host of the listener
@@ -30,10 +30,20 @@ public class Listener {
      * The port of the listener
      */
     public final int port;
+    /**
+     * Whether the listener is secure (HTTPS) or not (HTTP)
+     */
+    public final boolean secure;
+    /**
+     * The scheme of the listener. Default is "http"
+     */
+    public String scheme;
 
-    /* test */ Listener(String host, int port) {
+    /* test */ Listener(String host, int port, boolean secure) {
         this.host = host;
         this.port = port;
+        this.secure = secure;
+        this.scheme = secure ? "https" : "http";
     }
 
     /**
@@ -46,7 +56,7 @@ public class Listener {
         if (matcher.matches()) {
             String host = matcher.group(1);
             int port = Integer.parseInt(matcher.group(2));
-            return new Listener(host, port);
+            return new Listener(host, port, listener.startsWith("https"));
         } else {
             throw new ConfigException(LISTENER_CONFIG, listener, "Listener must be of format http://[host]:[port]");
         }
@@ -54,7 +64,7 @@ public class Listener {
 
     @Override
     public String toString() {
-        return "http://" + host + ":" + port;
+        return scheme + "://" + host + ":" + port;
     }
 
     @Override
@@ -62,12 +72,12 @@ public class Listener {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Listener listener = (Listener) o;
-        return port == listener.port && Objects.equals(host, listener.host);
+        return port == listener.port && Objects.equals(host, listener.host) && secure == listener.secure;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(host, port);
+        return Objects.hash(host, port, secure);
     }
 
     /**
@@ -84,7 +94,7 @@ public class Listener {
         public void ensureValid(String name, Object value) {
             Matcher matcher = PATTERN.matcher(String.valueOf(value));
             if (!matcher.matches()) {
-                throw new ConfigException(name, value, "Listener must be of format http://[host]:[port]");
+                throw new ConfigException(name, value, "The Listener must be of format http(s)://[host]:[port]");
             }
         }
     }
